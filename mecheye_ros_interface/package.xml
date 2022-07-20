@@ -10,6 +10,7 @@
   <author email="liang@informatik.uni-hamburg.de">Hongzhuo Liang</author>
 
   <buildtool_depend>catkin</buildtool_depend>
+
   <build_depend>roscpp</build_depend>
   <build_depend>rospy</build_depend>
   <build_depend>std_msgs</build_depend>
@@ -20,12 +21,16 @@
   <exec_depend>rospy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>message_runtime</exec_depend>
+  <exec_depend>mecheye_ros_msg</exec_depend>
+
+  <build_depend>pcl_conversions</build_depend>
   <build_depend>message_generation</build_depend>
   <build_depend>cv_bridge</build_depend>
   <build_depend>image_transport</build_depend>
   <build_depend>genmsg</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>sensor_msgs</build_depend>
+  <build_depend>mecheye_ros_msg</build_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
