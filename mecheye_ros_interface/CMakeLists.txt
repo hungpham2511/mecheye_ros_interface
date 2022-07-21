@@ -14,10 +14,7 @@ find_package(PkgConfig REQUIRED)
 
 ## Find catkin and any catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  cv_bridge image_transport roscpp rospy std_msgs genmsg sensor_msgs tf
-  mecheye_ros_msg
-  pcl_conversions
-  )
+  cv_bridge image_transport roscpp rospy std_msgs genmsg sensor_msgs tf)
 
 pkg_check_modules(JSONCPP REQUIRED jsoncpp)
 
@@ -49,13 +46,3 @@ target_link_libraries(start
     ${JSONCPP_LIBRARIES}
     MechEyeApi
     )
-
-install(
-  TARGETS
-    start
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
-install(
-  DIRECTORY launch
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

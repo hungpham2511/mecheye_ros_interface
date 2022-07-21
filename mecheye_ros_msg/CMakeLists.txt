@@ -26,8 +26,10 @@ add_service_files(
   CaptureColorPointCloud.srv
   CaptureDepthMap.srv
   CapturePointCloud.srv
+  Connect.srv
   DeleteUserSet.srv
   DeviceInfo.srv
+  Disconnect.srv
   Get2DExpectedGrayValue.srv
   Get2DExposureMode.srv
   Get2DExposureSequence.srv
@@ -43,6 +45,7 @@ add_service_files(
   GetCloudSmoothMode.srv
   GetCurrentUserSet.srv
   GetDepthRange.srv
+  GetDeviceList.srv
   GetFringeContrastThreshold.srv
   GetFringeMinThreshold.srv
   GetLaserSettings.srv

@@ -5,6 +5,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <std_msgs/String.h>
 #include <sstream>
+#include "mecheye_ros_msg/GetDeviceList.h"
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/CameraInfo.h>
@@ -71,24 +72,6 @@ namespace mecheye_ros_interface
         static_broadcaster.sendTransform(pclTransform);
         static_broadcaster.sendTransform(colorPclTransform);
 
-        if (!findAndConnect(device))
-            return;
-
-        // Uncomment the following lines to connect a camera with ip inside .launch file
-
-        // mmind::api::ErrorStatus status;
-        // mmind::api::MechEyeDeviceInfo info;
-        // info.firmwareVersion = "1.5.2";
-        // info.ipAddress = camera_ip;
-        // info.port = 5577;
-        // status = device.connect(info);
-        // if (!status.isOK())
-        // {
-        //     showError(status);
-        //     return;
-        // }
-        // std::cout << "Connected to the Mech-Eye device successfully." << std::endl;
-
         mmind::api::MechEyeDeviceInfo deviceInfo;
         showError(device.getDeviceInfo(deviceInfo));
         printDeviceInfo(deviceInfo);
@@ -114,8 +97,10 @@ namespace mecheye_ros_interface
             nh.advertiseService("capture_depth_map", &MechMindCamera::capture_depth_map_callback, this);
         capture_point_cloud_service =
             nh.advertiseService("capture_point_cloud", &MechMindCamera::capture_point_cloud_callback, this);
+        connect_service = nh.advertiseService("connect", &MechMindCamera::connect_callback, this);
         delete_user_set_service = nh.advertiseService("delete_user_set", &MechMindCamera::delete_user_set_callback, this);
         device_info_service = nh.advertiseService("device_info", &MechMindCamera::device_info_callback, this);
+        disconnect_service = nh.advertiseService("disconnect", &MechMindCamera::disconnect_callback, this);
         get_2d_expected_gray_value_service =
             nh.advertiseService("get_2d_expected_gray_value", &MechMindCamera::get_2d_expected_gray_value_callback, this);
         get_2d_exposure_mode_service =
@@ -141,6 +126,7 @@ namespace mecheye_ros_interface
         get_current_user_set_service =
             nh.advertiseService("get_current_user_set", &MechMindCamera::get_current_user_set_callback, this);
         get_depth_range_service = nh.advertiseService("get_depth_range", &MechMindCamera::get_depth_range_callback, this);
+        get_device_list_service = nh.advertiseService("get_device_list", &MechMindCamera::get_device_list_callback, this);
         get_fringe_contrast_threshold_service = nh.advertiseService(
             "get_fringe_contrast_threshold", &MechMindCamera::get_fringe_contrast_threshold_callback, this);
         get_fringe_min_threshold_service =
@@ -178,6 +164,11 @@ namespace mecheye_ros_interface
             nh.advertiseService("set_fringe_min_threshold", &MechMindCamera::set_fringe_min_threshold_callback, this);
         set_laser_settings_service =
             nh.advertiseService("set_laser_settings", &MechMindCamera::set_laser_settings_callback, this);
+    }
+
+
+    MechMindCamera::~MechMindCamera(){
+        device.disconnect();
     }
 
     void MechMindCamera::publishColorMap(mmind::api::ColorMap &colorMap)
@@ -294,7 +285,7 @@ namespace mecheye_ros_interface
         mmind::api::ErrorStatus status = device.addUserSet({req.value.c_str()});
         showError(status);
         res.errorCode = status.errorCode;
-        res.errorDescription = status.errorDescription.c_str();
+        res.errorDescription = status.errorDescription;
         return true;
     }
 
@@ -304,8 +295,17 @@ namespace mecheye_ros_interface
         mmind::api::ErrorStatus status = device.captureColorMap(colorMap);
         showError(status);
         res.errorCode = status.errorCode;
-        res.errorDescription = status.errorDescription.c_str();
-        publishColorMap(colorMap);
+        res.errorDescription = status.errorDescription;
+
+        cv::Mat color = cv::Mat(colorMap.height(), colorMap.width(), CV_8UC3, colorMap.data());
+        cv_bridge::CvImage cv_image;
+        cv_image.image = color;
+        cv_image.encoding = sensor_msgs::image_encodings::BGR8;
+        sensor_msgs::Image ros_image;
+        cv_image.toImageMsg(ros_image);
+        ros_image.header.frame_id = "mechmind_camera/color_map";
+        ros_image.header.stamp = ros::Time::now();
+        res.image = ros_image;
         return true;
     }
 
@@ -338,8 +338,37 @@ namespace mecheye_ros_interface
         mmind::api::ErrorStatus status = device.capturePointXYZMap(pointXYZMap);
         showError(status);
         res.errorCode = status.errorCode;
-        res.errorDescription = status.errorDescription.c_str();
-        publishPointCloud(pointXYZMap);
+        res.errorDescription = status.errorDescription;
+
+        pcl::PointCloud<pcl::PointXYZ> cloud(pointXYZMap.width(), pointXYZMap.height());
+        toPCL(cloud, pointXYZMap);
+        sensor_msgs::PointCloud2 ros_cloud;
+        pcl::toROSMsg(cloud, ros_cloud);
+        ros_cloud.header.frame_id = "mechmind_camera/point_cloud";
+        ros_cloud.header.stamp = ros::Time::now();
+        res.pointCloud = ros_cloud;
+        return true;
+    }
+
+    bool MechMindCamera::connect_callback(Connect::Request& req, Connect::Response& res){
+        mmind::api::ErrorStatus status;
+        mmind::api::MechEyeDeviceInfo info;
+
+        info.model = req.model;
+        info.id = req.id;
+        info.hardwareVersion = req.hardwareVersion;
+        info.firmwareVersion = req.firmwareVersion;
+        info.ipAddress = req.ipAddress;
+        info.port = req.port;
+
+        status = device.connect(info);
+        if (!status.isOK())
+        {
+            ROS_WARN("Fail to connect to the selected camera");
+        }
+
+        res.errorCode = (int)status.errorCode;
+        res.errorDescription = status.errorDescription;
         return true;
     }
 
@@ -364,6 +393,11 @@ namespace mecheye_ros_interface
         res.ipAddress = deviceInfo.ipAddress.c_str();
         res.port = deviceInfo.port;
         return status.isOK();
+    }
+
+    bool MechMindCamera::disconnect_callback(Disconnect::Request &req, Disconnect::Response &res){
+        device.disconnect();
+        return true;
     }
 
     bool MechMindCamera::get_2d_expected_gray_value_callback(Get2DExpectedGrayValue::Request &req,
@@ -574,6 +608,20 @@ namespace mecheye_ros_interface
         res.lower = depthRange.lower;
         res.upper = depthRange.upper;
         return status.isOK();
+    }
+
+    bool MechMindCamera::get_device_list_callback(GetDeviceList::Request &req, GetDeviceList::Response &res){
+        auto device_info_list = mmind::api::MechEyeDevice::enumerateMechEyeDeviceList();
+        ROS_INFO("Found %d cameras", device_info_list.size());
+        for (auto const & info : device_info_list){
+            res.firmwareVersion.push_back(info.firmwareVersion);
+            res.hardwareVersion.push_back(info.hardwareVersion);
+            res.model.push_back(info.model);
+            res.ipAddress.push_back(info.ipAddress);
+            res.id.push_back(info.id);
+            res.port.push_back(info.port);
+        }
+        return true;
     }
 
     bool MechMindCamera::get_fringe_contrast_threshold_callback(GetFringeContrastThreshold::Request &req,
