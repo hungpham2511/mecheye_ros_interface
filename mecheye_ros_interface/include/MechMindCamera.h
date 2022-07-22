@@ -5,8 +5,10 @@
 #include <mecheye_ros_msg/CaptureColorPointCloud.h>
 #include <mecheye_ros_msg/CaptureDepthMap.h>
 #include <mecheye_ros_msg/CapturePointCloud.h>
+#include <mecheye_ros_msg/Connect.h>
 #include <mecheye_ros_msg/DeleteUserSet.h>
 #include <mecheye_ros_msg/DeviceInfo.h>
+#include <mecheye_ros_msg/Disconnect.h>
 #include <mecheye_ros_msg/Get2DExpectedGrayValue.h>
 #include <mecheye_ros_msg/Get2DExposureMode.h>
 #include <mecheye_ros_msg/Get2DExposureSequence.h>
@@ -22,6 +24,7 @@
 #include <mecheye_ros_msg/GetCloudSmoothMode.h>
 #include <mecheye_ros_msg/GetCurrentUserSet.h>
 #include <mecheye_ros_msg/GetDepthRange.h>
+#include <mecheye_ros_msg/GetDeviceList.h>
 #include <mecheye_ros_msg/GetFringeContrastThreshold.h>
 #include <mecheye_ros_msg/GetFringeMinThreshold.h>
 #include <mecheye_ros_msg/GetLaserSettings.h>
@@ -53,6 +56,7 @@ namespace mecheye_ros_interface
     {
     public:
         MechMindCamera();
+        ~MechMindCamera();
 
     private:
         mmind::api::MechEyeDevice device;
@@ -92,8 +96,10 @@ namespace mecheye_ros_interface
         ros::ServiceServer capture_color_point_cloud_service;
         ros::ServiceServer capture_depth_map_service;
         ros::ServiceServer capture_point_cloud_service;
+        ros::ServiceServer connect_service;
         ros::ServiceServer delete_user_set_service;
         ros::ServiceServer device_info_service;
+        ros::ServiceServer disconnect_service;
         ros::ServiceServer get_2d_expected_gray_value_service;
         ros::ServiceServer get_2d_exposure_mode_service;
         ros::ServiceServer get_2d_exposure_sequence_service;
@@ -109,6 +115,7 @@ namespace mecheye_ros_interface
         ros::ServiceServer get_cloud_smooth_mode_service;
         ros::ServiceServer get_current_user_set_service;
         ros::ServiceServer get_depth_range_service;
+        ros::ServiceServer get_device_list_service;
         ros::ServiceServer get_fringe_contrast_threshold_service;
         ros::ServiceServer get_fringe_min_threshold_service;
         ros::ServiceServer get_laser_settings_service;
@@ -151,8 +158,10 @@ namespace mecheye_ros_interface
         bool capture_color_point_cloud_callback(CaptureColorPointCloud::Request &req, CaptureColorPointCloud::Response &res);
         bool capture_depth_map_callback(CaptureDepthMap::Request &req, CaptureDepthMap::Response &res);
         bool capture_point_cloud_callback(CapturePointCloud::Request &req, CapturePointCloud::Response &res);
+        bool connect_callback(Connect::Request &req, Connect::Response &res);
         bool delete_user_set_callback(DeleteUserSet::Request &req, DeleteUserSet::Response &res);
         bool device_info_callback(DeviceInfo::Request &req, DeviceInfo::Response &res);
+        bool disconnect_callback(Disconnect::Request &req, Disconnect::Response &res);
         bool get_2d_expected_gray_value_callback(Get2DExpectedGrayValue::Request &req,
                                                  Get2DExpectedGrayValue::Response &res);
         bool get_2d_exposure_mode_callback(Get2DExposureMode::Request &req, Get2DExposureMode::Response &res);
@@ -170,6 +179,7 @@ namespace mecheye_ros_interface
         bool get_cloud_smooth_mode_callback(GetCloudSmoothMode::Request &req, GetCloudSmoothMode::Response &res);
         bool get_current_user_set_callback(GetCurrentUserSet::Request &req, GetCurrentUserSet::Response &res);
         bool get_depth_range_callback(GetDepthRange::Request &req, GetDepthRange::Response &res);
+        bool get_device_list_callback(GetDeviceList::Request &req, GetDeviceList::Response &res);
         bool get_fringe_contrast_threshold_callback(GetFringeContrastThreshold::Request &req,
                                                     GetFringeContrastThreshold::Response &res);
         bool get_fringe_min_threshold_callback(GetFringeMinThreshold::Request &req, GetFringeMinThreshold::Response &res);
