@@ -5,7 +5,8 @@
 #include <opencv2/imgcodecs.hpp>
 #include <std_msgs/String.h>
 #include <sstream>
-#include "mecheye_ros_msg/GetDeviceList.h"
+#include "MechEyeDataType.h"
+#include <mecheye_ros_msg/GetDeviceList.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/CameraInfo.h>
@@ -161,6 +162,7 @@ namespace mecheye_ros_interface
             nh.advertiseService("get_uhp_fringe_coding_mode", &MechMindCamera::get_uhp_fringe_coding_mode_callback, this);
         get_uhp_settings_service =
             nh.advertiseService("get_uhp_settings", &MechMindCamera::get_uhp_settings_callback, this);
+        get_camera_info_service = nh.advertiseService("get_camera_info", &MechMindCamera::get_camera_info_callback, this);
         save_all_settings_to_user_sets_service = nh.advertiseService(
             "save_all_settings_to_user_sets", &MechMindCamera::save_all_settings_to_user_sets_callback, this);
 
@@ -582,6 +584,59 @@ namespace mecheye_ros_interface
         // res.sequence = charPtrSequence;
         res.sequence = sequence;
         return status.isOK();
+    }
+
+    bool MechMindCamera::get_camera_info_callback(GetCameraInfo::Request &req, GetCameraInfo::Response &res)
+    {
+        ROS_DEBUG("Getting camera info");
+        sensor_msgs::CameraInfo camera_info;
+        mmind::api::DeviceResolution resolution;
+        device.getDeviceResolution(resolution);
+        device.getDeviceIntri(intri);
+
+        camera_info.height = resolution.colorMapHeight;
+        camera_info.width = resolution.colorMapWidth;
+        camera_info.distortion_model = "plumb_bob";
+        camera_info.D = std::vector<double>(intri.distCoeffs, intri.distCoeffs + 5);
+
+        std::vector<double> K{intri.cameraMatrix[0],
+                              0.0,
+                              intri.cameraMatrix[2],
+                              0.0,
+                              intri.cameraMatrix[1],
+                              intri.cameraMatrix[3],
+                              0.0,
+                              0.0,
+                              1.0};
+        for (size_t i = 0; i < 9; ++i)
+        {
+            camera_info.K[i] = K[i];
+        }
+
+        std::vector<double> R{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+        for (size_t i = 0; i < 9; ++i)
+        {
+            camera_info.R[i] = R[i];
+        }
+
+        std::vector<double> P{intri.cameraMatrix[0],
+                              0.0,
+                              intri.cameraMatrix[2],
+                              0.0,
+                              0.0,
+                              intri.cameraMatrix[1],
+                              intri.cameraMatrix[3],
+                              0.0,
+                              0.0,
+                              0.0,
+                              1.0,
+                              0.0};
+        for (size_t i = 0; i < 12; ++i)
+        {
+            camera_info.P[i] = P[i];
+        }
+        res.camera_info = camera_info;
+        return true;
     }
 
     bool MechMindCamera::get_cloud_outlier_filter_mode_callback(GetCloudOutlierFilterMode::Request &req,
