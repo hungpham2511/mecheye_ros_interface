@@ -41,6 +41,7 @@ add_service_files(
   Get3DGain.srv
   Get3DROI.srv
   GetAllUserSets.srv
+  GetCameraInfo.srv
   GetCloudOutlierFilterMode.srv
   GetCloudSmoothMode.srv
   GetCurrentUserSet.srv

@@ -46,6 +46,8 @@
 #include <mecheye_ros_msg/SetFringeContrastThreshold.h>
 #include <mecheye_ros_msg/SetFringeMinThreshold.h>
 #include <mecheye_ros_msg/SetLaserSettings.h>
+#include <mecheye_ros_msg/GetCameraInfo.h>
+
 
 namespace mecheye_ros_interface
 {
@@ -111,6 +113,7 @@ namespace mecheye_ros_interface
         ros::ServiceServer get_3d_gain_service;
         ros::ServiceServer get_3d_roi_service;
         ros::ServiceServer get_all_user_sets_service;
+        ros::ServiceServer get_camera_info_service;
         ros::ServiceServer get_cloud_outlier_filter_mode_service;
         ros::ServiceServer get_cloud_smooth_mode_service;
         ros::ServiceServer get_current_user_set_service;
@@ -159,6 +162,7 @@ namespace mecheye_ros_interface
         bool get_3d_gain_callback(Get3DGain::Request &req, Get3DGain::Response &res);
         bool get_3d_roi_callback(Get3DROI::Request &req, Get3DROI::Response &res);
         bool get_all_user_sets_callback(GetAllUserSets::Request &req, GetAllUserSets::Response &res);
+        bool get_camera_info_callback(GetCameraInfo::Request &req, GetCameraInfo::Response &res);
         bool get_cloud_outlier_filter_mode_callback(GetCloudOutlierFilterMode::Request &req,
                                                     GetCloudOutlierFilterMode ::Response &res);
         bool get_cloud_smooth_mode_callback(GetCloudSmoothMode::Request &req, GetCloudSmoothMode::Response &res);
