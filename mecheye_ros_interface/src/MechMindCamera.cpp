@@ -73,8 +73,8 @@ namespace mecheye_ros_interface
         static_broadcaster.sendTransform(pclTransform);
         static_broadcaster.sendTransform(colorPclTransform);
 
-        if (!findAndConnect(device))
-            return;
+        // if (!findAndConnect(device))
+        //     return;
 
         // Uncomment the following lines to connect a camera with ip inside .launch file
 
@@ -597,14 +597,14 @@ namespace mecheye_ros_interface
         camera_info.height = resolution.colorMapHeight;
         camera_info.width = resolution.colorMapWidth;
         camera_info.distortion_model = "plumb_bob";
-        camera_info.D = std::vector<double>(intri.distCoeffs, intri.distCoeffs + 5);
+        camera_info.D = std::vector<double>(intri.textureCameraIntri.distortion, intri.textureCameraIntri.distortion + 5);
 
-        std::vector<double> K{intri.cameraMatrix[0],
+        std::vector<double> K{intri.textureCameraIntri.cameraMatrix[0],
                               0.0,
-                              intri.cameraMatrix[2],
+                              intri.textureCameraIntri.cameraMatrix[2],
                               0.0,
-                              intri.cameraMatrix[1],
-                              intri.cameraMatrix[3],
+                              intri.textureCameraIntri.cameraMatrix[1],
+                              intri.textureCameraIntri.cameraMatrix[3],
                               0.0,
                               0.0,
                               1.0};
@@ -619,13 +619,13 @@ namespace mecheye_ros_interface
             camera_info.R[i] = R[i];
         }
 
-        std::vector<double> P{intri.cameraMatrix[0],
+        std::vector<double> P{intri.textureCameraIntri.cameraMatrix[0],
                               0.0,
-                              intri.cameraMatrix[2],
+                              intri.textureCameraIntri.cameraMatrix[2],
                               0.0,
                               0.0,
-                              intri.cameraMatrix[1],
-                              intri.cameraMatrix[3],
+                              intri.textureCameraIntri.cameraMatrix[1],
+                              intri.textureCameraIntri.cameraMatrix[3],
                               0.0,
                               0.0,
                               0.0,

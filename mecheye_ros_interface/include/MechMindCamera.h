@@ -46,6 +46,18 @@
 #include <mecheye_ros_msg/SetFringeContrastThreshold.h>
 #include <mecheye_ros_msg/SetFringeMinThreshold.h>
 #include <mecheye_ros_msg/SetLaserSettings.h>
+#include <mecheye_ros_msg/SetUhpCaptureMode.h>
+#include <mecheye_ros_msg/SetUhpFringeCodingMode.h>
+#include <mecheye_ros_msg/SetUhpSettings.h>
+#include <mecheye_ros_msg/GetUhpCaptureMode.h>
+#include <mecheye_ros_msg/GetUhpFringeCodingMode.h>
+#include <mecheye_ros_msg/GetUhpSettings.h>
+#include <mecheye_ros_msg/SetProjectorAntiFlickerMode.h>
+#include <mecheye_ros_msg/SetProjectorFringeCodingMode.h>
+#include <mecheye_ros_msg/SetProjectorPowerLevel.h>
+#include <mecheye_ros_msg/GetProjectorAntiFlickerMode.h>
+#include <mecheye_ros_msg/GetProjectorFringeCodingMode.h>
+#include <mecheye_ros_msg/GetProjectorPowerLevel.h>
 #include <mecheye_ros_msg/GetCameraInfo.h>
 
 
